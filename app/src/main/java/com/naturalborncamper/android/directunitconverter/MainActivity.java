@@ -13,9 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.naturalborncamper.android.directunitconverter.data.CachedCursor;
 import com.naturalborncamper.android.directunitconverter.data.DefaultConversions;
@@ -25,6 +23,7 @@ import com.naturalborncamper.android.directunitconverter.data.UnitsModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static com.naturalborncamper.android.directunitconverter.data.UnitConverterContract.UnitsEntry;
 
@@ -36,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     private CachedCursor mAllUnitsCursor;
 
 
-    private String[] mPlanetTitles;
+    private String[] mCategories;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
@@ -53,52 +52,56 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
             DefaultConversions.generateDefaultConversions(db);
         }
 
-        mPlanetTitles = new String[]{"bob1", "bob2"};
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerList = findViewById(R.id.categories_drawer);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.category_menu_item, mPlanetTitles);
-        mDrawerList.setAdapter(adapter);
-        mDrawerList.setOnItemClickListener(new CategoryMenuItemClickListener());
 
         buildConversionScreen(savedInstanceState);
     }
 
     public void buildConversionScreen(@Nullable Bundle savedInstanceState) {
         mCurrentUnitIds.clear();
+        TreeSet<String> categories = new TreeSet<>();
 
         String currentInputCategory = (savedInstanceState != null) ? savedInstanceState.getString(EXTRA_CURRENT_CATEGORY, "") : "";
         mAllUnitsCursor = mUnitsModel.getAllUnits();
-        if (mAllUnitsCursor != null) {
-            mAllUnitsCursor.moveToFirst();
-            do {
-                try {
-                    List<String> categories = Arrays.asList(mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES).split(","));
-                    if ("".equals(currentInputCategory)) currentInputCategory = categories.get(0);
+        mAllUnitsCursor.moveToFirst();
+        String category = mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES);
+        if ("".equals(currentInputCategory)) currentInputCategory = category;
 
-                    Log.d(C.TAG_DEBUG, "current id: " + mAllUnitsCursor.getInt(UnitsEntry._ID));
-                    // Add this unit in the current conversion screen
-                    if (categories.contains(currentInputCategory)) {
-                        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.input_window);
-                        TextInputLayout textInputLayout = new TextInputLayout(this);
+        // TODO When DB empty, make sure nothing crashes
+        do {
+            try {
+                categories.add(mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES));
+                category = mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES); // Repeated on first iteration
+                categories.add(category);
 
-//                        EditText input = new EditText(this, null);
-                        UnitEditText input = new UnitEditText(this, mAllUnitsCursor);
-                        input.setId(mAllUnitsCursor.getPosition());
-                        mCurrentUnitIds.add(mAllUnitsCursor.getPosition());
-                        input.setHint(mAllUnitsCursor.getString(UnitsEntry.COLUMN_TITLE));
-//                    input.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-                        textInputLayout.addView(input);
-                        linearLayout.addView(textInputLayout);
-                    }
-                } catch (Exception e) {
-                    Log.e(C.TAG_DB, "Error retrieving units data: " + e.getMessage());
-                    e.printStackTrace();
+                // Add this unit in the current conversion screen
+                if (category.equals(currentInputCategory)) {
+                    LinearLayout linearLayout = (LinearLayout) findViewById(R.id.input_window);
+                    TextInputLayout textInputLayout = new TextInputLayout(this);
+
+                    UnitEditText input = new UnitEditText(this, mAllUnitsCursor);
+                    input.setId(mAllUnitsCursor.getPosition());
+                    mCurrentUnitIds.add(mAllUnitsCursor.getPosition());
+                    input.setHint(mAllUnitsCursor.getString(UnitsEntry.COLUMN_TITLE));
+                    textInputLayout.addView(input);
+                    linearLayout.addView(textInputLayout);
                 }
+            } catch (Exception e) {
+                Log.e(C.TAG_DB, "Error retrieving units data: " + e.getMessage());
+                e.printStackTrace();
+            }
 
-            } while (mAllUnitsCursor.moveToNext());
+        } while (mAllUnitsCursor.moveToNext());
 
-        } else Log.d(C.TAG_DB, "cached cursor null");
+        categories.add("Weight");
+        categories.add("Volume");
+
+        // Not sure if it's better to write a TreeSetAdapter or just convert it to an Array and use ArrayAdapter for the categories menu
+        mCategories = categories.toArray(new String[categories.size()]);
+
+        mDrawerList.setAdapter(new ArrayAdapter(this, R.layout.category_menu_item, mCategories));
+        mDrawerList.setOnItemClickListener(new CategoryMenuItemClickListener());
     }
 
 //    public void unitInputChanged() {
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
         int focusedUnitId = findViewById(mFocusedUnit).getId();
         mAllUnitsCursor.moveToPosition(focusedUnitId);
         Float focusedUnitMultiplier = mAllUnitsCursor.getFloat(UnitsEntry.COLUMN_MULTIPLIER);
-        Float focusedUnitValue = (editable.length() > 0)? Float.valueOf(editable.toString()): 0;
+        Float focusedUnitValue = (editable.length() > 0) ? Float.valueOf(editable.toString()) : 0;
         Float focusedUnitUnmultipliedValue = focusedUnitValue/focusedUnitMultiplier;
 
         for (int id : mCurrentUnitIds) {
@@ -140,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
         if (isFocused) Log.d(C.TAG_DEBUG, "Focused id: " + view.getId());
     }
 
-    private class CategoryMenuItemClickListener implements ListView.OnItemClickListener{
+    private class CategoryMenuItemClickListener implements ListView.OnItemClickListener {
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {

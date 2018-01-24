@@ -25,8 +25,8 @@ public class UnitConverterDbHelper extends SQLiteOpenHelper {
                 + UnitsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + UnitsEntry.COLUMN_TITLE + " TEXT NOT NULL, "
                 + UnitsEntry.COLUMN_CATEGORIES + " TEXT NOT NULL, "
-                + UnitsEntry.COLUMN_MULTIPLIER + " REAL NULL DEFAULT NULL, "
-                + UnitsEntry.COLUMN_FORMULA + " TEXT NULL DEFAULT NULL, "
+                + UnitsEntry.COLUMN_MULTIPLIER + " REAL DEFAULT NULL, "
+                + UnitsEntry.COLUMN_FORMULA + " TEXT DEFAULT NULL, "
                 + UnitsEntry.COLUMN_ORDER + " INT NOT NULL DEFAULT 0"
                 + ");"
         );
