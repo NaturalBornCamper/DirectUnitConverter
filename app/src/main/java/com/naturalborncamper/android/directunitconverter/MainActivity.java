@@ -4,12 +4,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.naturalborncamper.android.directunitconverter.data.CachedCursor;
 import com.naturalborncamper.android.directunitconverter.data.DefaultConversions;
@@ -29,6 +35,11 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     private ArrayList<Integer> mCurrentUnitIds = new ArrayList<>();
     private CachedCursor mAllUnitsCursor;
 
+
+    private String[] mPlanetTitles;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +52,14 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
             Log.d(C.TAG_DEBUG, "Units table empty, generating default units");
             DefaultConversions.generateDefaultConversions(db);
         }
+
+        mPlanetTitles = new String[]{"bob1", "bob2"};
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerList = findViewById(R.id.categories_drawer);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.category_menu_item, mPlanetTitles);
+        mDrawerList.setAdapter(adapter);
+        mDrawerList.setOnItemClickListener(new CategoryMenuItemClickListener());
 
         buildConversionScreen(savedInstanceState);
     }
@@ -117,13 +136,22 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 
     @Override
     public void onFocusChange(View view, boolean isFocused) {
-//        UnitEditText bob = (UnitEditText) view;
-//        bob.getPositionInCursor();
         mFocusedUnit = view.getId();
         if (isFocused) Log.d(C.TAG_DEBUG, "Focused id: " + view.getId());
     }
+
+    private class CategoryMenuItemClickListener implements ListView.OnItemClickListener{
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+            String bob = (String) adapterView.getAdapter().getItem(position);
+            Log.d(C.TAG_DEBUG, bob);
+        }
+    }
 }
 
+
+// TODO Move all Todo in Trello?
 
 // TODO Add drawer menu
 // TODO Add categories in drawer menu
@@ -144,6 +172,8 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 // TODO Save/load current unit value in Bundle
 
 // TODO Add default conversions so the app is not empty by default
+
+// TODO Make an app icon
 
 // TODO Fragment layout main activity for tablet view, with categories always visible instead of drawer menu
 
