@@ -21,16 +21,64 @@ public final class DefaultConversions {
         ContentValues cv = new ContentValues();
         db.beginTransaction();
 
-        cv.put(UnitsEntry.COLUMN_TITLE, "Meters");
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "meters");
         cv.put(UnitsEntry.COLUMN_CATEGORIES, "Distance");
         cv.put(UnitsEntry.COLUMN_MULTIPLIER, 1);
         addUnitToTransaction(db, cv);
 
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Kilometers");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Distance");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, .001);
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Inches");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Distance");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, .000393700787);
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Feet");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Distance");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, 100/30.48); // 3.280839895
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Yard");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Distance");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, 0.9144);
+        addUnitToTransaction(db, cv);
 
         cv.clear();
         cv.put(UnitsEntry.COLUMN_TITLE, "Miles");
         cv.put(UnitsEntry.COLUMN_CATEGORIES, "Distance");
-        cv.put(UnitsEntry.COLUMN_MULTIPLIER, 1/1.6);
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, .000625);
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Litres");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Volume");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, 1);
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Cubic Meters");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Volume");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, .001);
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Litres");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Cooking Volume");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, 1);
+        addUnitToTransaction(db, cv);
+
+        cv.clear();
+        cv.put(UnitsEntry.COLUMN_TITLE, "Cups");
+        cv.put(UnitsEntry.COLUMN_CATEGORIES, "Cooking Volume");
+        cv.put(UnitsEntry.COLUMN_MULTIPLIER, 4);
         addUnitToTransaction(db, cv);
 
         try {

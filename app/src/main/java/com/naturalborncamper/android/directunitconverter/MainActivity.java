@@ -21,8 +21,6 @@ import com.naturalborncamper.android.directunitconverter.data.UnitConverterDbHel
 import com.naturalborncamper.android.directunitconverter.data.UnitsModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 
 import static com.naturalborncamper.android.directunitconverter.data.UnitConverterContract.UnitsEntry;
@@ -38,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     private String[] mCategories;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private String mCurrentInputCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,36 +50,46 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
             Log.d(C.TAG_DEBUG, "Units table empty, generating default units");
             DefaultConversions.generateDefaultConversions(db);
         }
+        mAllUnitsCursor = mUnitsModel.getAllUnits();
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerList = findViewById(R.id.categories_drawer);
 
         buildConversionScreen(savedInstanceState);
+
     }
 
     public void buildConversionScreen(@Nullable Bundle savedInstanceState) {
         mCurrentUnitIds.clear();
         TreeSet<String> categories = new TreeSet<>();
+        LinearLayout linearLayout = findViewById(R.id.input_window);
+        String category;
+        UnitEditText input;
+        TextInputLayout textInputLayout;
 
-        String currentInputCategory = (savedInstanceState != null) ? savedInstanceState.getString(EXTRA_CURRENT_CATEGORY, "") : "";
-        mAllUnitsCursor = mUnitsModel.getAllUnits();
+        // TODO Test with DB empty, make sure nothing crashes below
         mAllUnitsCursor.moveToFirst();
-        String category = mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES);
-        if ("".equals(currentInputCategory)) currentInputCategory = category;
+        linearLayout.removeAllViews();
 
-        // TODO When DB empty, make sure nothing crashes
+        if ("".equals(mCurrentInputCategory)) {
+            if (savedInstanceState != null)
+                mCurrentInputCategory = savedInstanceState.getString(EXTRA_CURRENT_CATEGORY, "");
+            else
+                mCurrentInputCategory = mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES);
+        }
+
         do {
             try {
+                // Add category in TreeSet for side menu
                 categories.add(mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES));
-                category = mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES); // Repeated on first iteration
+                category = mAllUnitsCursor.getString(UnitsEntry.COLUMN_CATEGORIES);
                 categories.add(category);
 
                 // Add this unit in the current conversion screen
-                if (category.equals(currentInputCategory)) {
-                    LinearLayout linearLayout = (LinearLayout) findViewById(R.id.input_window);
-                    TextInputLayout textInputLayout = new TextInputLayout(this);
+                if (category.equals(mCurrentInputCategory)) {
+                    textInputLayout = new TextInputLayout(this);
 
-                    UnitEditText input = new UnitEditText(this, mAllUnitsCursor);
+                    input = new UnitEditText(this, mAllUnitsCursor);
                     input.setId(mAllUnitsCursor.getPosition());
                     mCurrentUnitIds.add(mAllUnitsCursor.getPosition());
                     input.setHint(mAllUnitsCursor.getString(UnitsEntry.COLUMN_TITLE));
@@ -94,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 
         } while (mAllUnitsCursor.moveToNext());
 
+        // Dummy categories for test
         categories.add("Weight");
         categories.add("Volume");
 
@@ -147,37 +157,16 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-            String bob = (String) adapterView.getAdapter().getItem(position);
-            Log.d(C.TAG_DEBUG, bob);
+            mDrawerList.setItemChecked(position, true);
+            mDrawerLayout.closeDrawer(mDrawerList);
+            mCurrentInputCategory = (String) adapterView.getAdapter().getItem(position);
+//            getActionBar().setTitle(mCurrentInputCategory);
+            buildConversionScreen(null);
+            Log.d(C.TAG_DEBUG, mCurrentInputCategory);
         }
     }
 }
 
 
-// TODO Move all Todo in Trello?
-
-// TODO Add drawer menu
-// TODO Add categories in drawer menu
-
-// TODO In second activity, list all conversions
-// TODO In second activity, edit conversion
-// TODO In second activity, delete conversion
-// TODO In second activity, add conversion
-// TODO Validation either multiplier of formula, cannot both be empty
-// TODO Validation multiplier cannot be 0 (divide by zero)
-// TODO Validation name only characters and numbers
-// TODO Validation categories only characters, numbers and comma (trim after change, if possible)
-
-// TODO App lifecycle (onPause, resume, destroy, etc) for cursor
-
-// TODO Save/load current category in Bundle
-// TODO Save/load current unit in Bundle
-// TODO Save/load current unit value in Bundle
-
-// TODO Add default conversions so the app is not empty by default
-
-// TODO Make an app icon
-
-// TODO Fragment layout main activity for tablet view, with categories always visible instead of drawer menu
-
-// TODO Swipe to switch conversion category without opening side menu
+// TODO Check if worth it to transform main conversion screen into a RecyclerView
+// TODO If using RecyclerView, might be faster since no findViewById in a loop every time there is a change (Check Processor and memory use)
