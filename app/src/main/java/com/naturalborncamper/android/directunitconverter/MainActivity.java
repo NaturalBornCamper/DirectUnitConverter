@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -42,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_main);
+
+        Toolbar myToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
 
         SQLiteDatabase db = new UnitConverterDbHelper(this).getWritableDatabase();
         mUnitsModel = new UnitsModel(db);
@@ -157,7 +161,9 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-            mDrawerList.setItemChecked(position, true);
+            // Not really useful at the moment, but might be later
+//            mDrawerList.setItemChecked(position, true);
+
             mDrawerLayout.closeDrawer(mDrawerList);
             mCurrentInputCategory = (String) adapterView.getAdapter().getItem(position);
 //            getActionBar().setTitle(mCurrentInputCategory);
