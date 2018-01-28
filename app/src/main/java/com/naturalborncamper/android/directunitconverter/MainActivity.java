@@ -1,15 +1,20 @@
 package com.naturalborncamper.android.directunitconverter;
 
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     private String[] mCategories;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
     private String mCurrentInputCategory;
 
     @Override
@@ -58,9 +64,28 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerList = findViewById(R.id.categories_drawer);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setHomeButtonEnabled(true);
 
         buildConversionScreen(savedInstanceState);
+    }
 
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+//        return super.onCreateOptionsMenu(menu);
     }
 
     public void buildConversionScreen(@Nullable Bundle savedInstanceState) {
@@ -166,13 +191,23 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
 
             mDrawerLayout.closeDrawer(mDrawerList);
             mCurrentInputCategory = (String) adapterView.getAdapter().getItem(position);
-//            getActionBar().setTitle(mCurrentInputCategory);
+            getSupportActionBar().setTitle(mCurrentInputCategory);
             buildConversionScreen(null);
             Log.d(C.TAG_DEBUG, mCurrentInputCategory);
         }
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Item clicked was the drawer menu button
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
+        if (item.getItemId() == R.id.menu_edit_categories)
+            Log.d(C.TAG_DEBUG, "onOptionsItemSelected: " + item.getItemId());
+
+        return super.onOptionsItemSelected(item);
+    }
+
 }
-
-
-// TODO Check if worth it to transform main conversion screen into a RecyclerView
-// TODO If using RecyclerView, might be faster since no findViewById in a loop every time there is a change (Check Processor and memory use)
