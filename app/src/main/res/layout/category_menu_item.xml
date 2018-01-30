@@ -1,1 +1,2 @@
+<!-- Category name to show up in DrawerMenu -->
 <TextView style="@style/category_menu_item"/>

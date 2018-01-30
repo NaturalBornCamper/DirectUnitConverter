@@ -31,7 +31,7 @@ public class UnitsModel {
 //                    new String[]{UnitsEntry.COLUMN_TITLE, UnitsEntry.COLUMN_CATEGORIES},
                     null,
                     null, null, null, null,
-                    UnitsEntry.COLUMN_CATEGORIES + "," + UnitsEntry.COLUMN_ORDER
+                    UnitsEntry.COLUMN_CATEGORIES + "," + UnitsEntry.COLUMN_ORDER + "," + UnitsEntry.COLUMN_TITLE
             );
         } catch (Exception e) {
             Log.e(C.TAG_DB, "Error when getting all units: " + e.getMessage());

@@ -16,6 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".EditUnitsActivity"
+            android:parentActivityName="com.naturalborncamper.android.directunitconverter.MainActivity">
+            <!-- Parent activity Android 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.naturalborncamper.android.directunitconverter.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

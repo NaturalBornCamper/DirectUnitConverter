@@ -1,6 +1,6 @@
 package com.naturalborncamper.android.directunitconverter;
 
-import android.content.res.Configuration;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -32,6 +32,8 @@ import java.util.TreeSet;
 import static com.naturalborncamper.android.directunitconverter.data.UnitConverterContract.UnitsEntry;
 
 public class MainActivity extends AppCompatActivity implements TextWatcher, View.OnFocusChangeListener {
+    private static final int EDIT_UNITS_REQUEST_CODE = 1;
+
     UnitsModel mUnitsModel;
     public static final String EXTRA_CURRENT_CATEGORY = "extra_category";
     private int mFocusedUnit;
@@ -48,9 +50,9 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_main);
+        setContentView(R.layout.activity_main);
 
-        Toolbar myToolbar = findViewById(R.id.toolbar);
+        Toolbar myToolbar = findViewById(R.id.tb_main);
         setSupportActionBar(myToolbar);
 
         SQLiteDatabase db = new UnitConverterDbHelper(this).getWritableDatabase();
@@ -62,8 +64,8 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
         }
         mAllUnitsCursor = mUnitsModel.getAllUnits();
 
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        mDrawerList = findViewById(R.id.categories_drawer);
+        mDrawerLayout = findViewById(R.id.dl_main);
+        mDrawerList = findViewById(R.id.lv_categories);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
     public void buildConversionScreen(@Nullable Bundle savedInstanceState) {
         mCurrentUnitIds.clear();
         TreeSet<String> categories = new TreeSet<>();
-        LinearLayout linearLayout = findViewById(R.id.input_window);
+        LinearLayout linearLayout = findViewById(R.id.ll_input_window);
         String category;
         UnitEditText input;
         TextInputLayout textInputLayout;
@@ -142,10 +144,6 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
         mDrawerList.setAdapter(new ArrayAdapter(this, R.layout.category_menu_item, mCategories));
         mDrawerList.setOnItemClickListener(new CategoryMenuItemClickListener());
     }
-
-//    public void unitInputChanged() {
-////        Log.d(C.TAG_DEBUG, "DSFSdddddddddddddddDFSDF");
-//    }
 
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -204,8 +202,11 @@ public class MainActivity extends AppCompatActivity implements TextWatcher, View
             return true;
         }
 
-        if (item.getItemId() == R.id.menu_edit_categories)
+        if (item.getItemId() == R.id.menu_edit_categories){
             Log.d(C.TAG_DEBUG, "onOptionsItemSelected: " + item.getItemId());
+            Intent intent = new Intent(this, EditUnitsActivity.class);
+            startActivityForResult(intent, EDIT_UNITS_REQUEST_CODE);
+        }
 
         return super.onOptionsItemSelected(item);
     }
